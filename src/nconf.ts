@@ -5,13 +5,13 @@ nconf.file({
     file: __dirname + '/config.json'
 });
 nconf.defaults({
-    rootTopic: 'xbmq',
+    rootTopic: 'zbmq',
     broker: 'mqtt://test.mosquitto.org',
     username: null,
     password: null,
     port: '/dev/ttyUSB1',
     baud: 57600,
-    log: __dirname + '/xbmq.log',
+    log: __dirname + '/zbmq.log',
     loglevel: 'info',
     apiMode: 2
 });

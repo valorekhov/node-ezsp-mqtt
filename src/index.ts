@@ -23,7 +23,7 @@ let gatewayTopic: string;
 
 function whenMqttMessageReceived(error: Error, topic: string, message: any) {
     if (error) {
-        log(error);
+        log.error(error);
         /*
          * Logging MQTT errors back to MQTT may create a infinite loop.
          */
@@ -43,7 +43,7 @@ function whenMqttMessageReceived(error: Error, topic: string, message: any) {
     try {
         ezsp.transmitMqttMessage(address, obj.frame, obj.payload);
     } catch (error) {
-        log(error);
+        log.error(error);
         mqtt.publishLog(error);
     }
 }
@@ -54,7 +54,7 @@ function whenEzspMessageReceived(frame: any) {
             mqtt.publishEzspFrame(frame);
         }
     } catch (error) {
-        log('error', error);
+        log.error(error);
         if (mqtt.isConnected()) {
             mqtt.publishLog(error);
         }
@@ -70,9 +70,9 @@ async function run() {
     const localAddress = await ezsp.getLocalAddress();
 
     gatewayTopic = rootTopic + '/' + localAddress;
-    log('info', 'Gateway Topic: ' + gatewayTopic);
+    log.info('Gateway Topic: ' + gatewayTopic);
     mqtt.begin(broker, credentials, gatewayTopic, whenMqttMessageReceived);
-    log('info', 'Started!');
+    log.info('Started!');
 }
 
 run();

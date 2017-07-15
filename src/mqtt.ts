@@ -22,7 +22,7 @@ export function begin(broker: string, credentials: { username: string, password:
     rootTopic = topic;
 
     var mqttOptions = <Mqtt.IClientOptions>{
-        clientId: 'xbmq-' + Math.random().toString(16).substr(2, 8),
+        clientId: 'zbmq-' + Math.random().toString(16).substr(2, 8),
         clean: false,
         keepalive: 60,
         reconnectPeriod: 15000,
@@ -45,14 +45,14 @@ export function begin(broker: string, credentials: { username: string, password:
         /*
          * Emitted when a reconnection starts.
          */
-        log('debug', 'Reconnecting');
+        log.debug('Reconnecting');
     });
 
     mqtt.on('close', function () {
         /*
          * Emitted after the client has disconnected from the broker.
          */
-        log('debug', 'Closing');
+        log.debug( 'Closing');
         connected = false;
     });
 
@@ -60,11 +60,11 @@ export function begin(broker: string, credentials: { username: string, password:
         /*
          * Emitted when the client goes offline. 
          */
-        log('debug', 'Offline');
+        log.debug('Offline');
     });
 
     mqtt.on('connect', function (connack: any) {
-        log('debug', 'Connected to ' + broker);
+        log.debug('Connected to ' + broker);
         connected = true;
         publishOnlineStatus(true);
         if (connack.sessionPresent) {
@@ -85,12 +85,12 @@ export function begin(broker: string, credentials: { username: string, password:
     });
 
     mqtt.on('error', function (error) {
-        log('error', error);
+        log.error(error);
         return messageCallback(error, null, null);
     });
 
     mqtt.on('message', function (topic, message) {
-        log('debug', 'Received: ' + topic + ': ' + message);
+        log.error('Received: ' + topic + ': ' + message);
         return messageCallback(null, topic, message.toString());
     });
 
@@ -115,7 +115,7 @@ export function end(callback: Function) {
 }
 
 /**
- * Publish XBMQ Gateway's online status to the `online` topic.  Will publish
+ * Publish ZBMQ Gateway's online status to the `online` topic.  Will publish
  * "1" when online or "0" when offline.
  * @param {Boolean} isOnline - true for online, false for offline
  *
@@ -138,7 +138,7 @@ export function publishEzspFrame(frame:any) {
     if (!frame) return; /* don't publish empty frames */
     var topic = rootTopic + '/response';
     var message = JSON.stringify(frame);
-    log('debug', 'Sending: ' + topic + ': ' + message);
+    log.debug('Sending: ' + topic + ': ' + message);
     mqtt.publish(topic, message);
 }
 

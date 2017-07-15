@@ -1,5 +1,5 @@
 import { ControllerApplication } from 'node-ezsp'
-import { EmberApsFrame } from 'node-ezsp/lib/types';
+import { EmberApsFrame, EmberEUI64 } from 'node-ezsp/lib/types';
 
 export class EzspGateway {
 
@@ -15,7 +15,6 @@ export class EzspGateway {
      * is received or there is an error. 
      */
     begin(port: string, baud: number, messageCallback: (payload: {}) => void) {
-
         if (!messageCallback) {
             throw new TypeError("Invalid messageCallback");
         }
@@ -49,13 +48,16 @@ export class EzspGateway {
     }
 
     transmitMqttMessage(nwk: number | string, apsFrame: EmberApsFrame, message: string) {
-        return this.application.request(nwk, apsFrame, Buffer.from(message))
+        if (typeof(nwk)==='string'){
+            nwk = new EmberEUI64(nwk) as any;
+        }
+        return this.application.request(nwk as any, apsFrame, Buffer.from(message))
     }
     
     /**
      * Return a promise that resolves with the 64-bit address of the local XBee.
      */
     getLocalAddress() {
-        return this.application.getLocalIEEE64Address();
+        return this.application.getLocalEUI64();
     }
 }
