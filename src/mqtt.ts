@@ -1,12 +1,6 @@
 import * as Mqtt from 'mqtt';
 import log from './logger';
 
-module.exports = {
-    publishXBeeFrame: publishXBeeFrame,
-    publishLog: publishLog,
-    isConnected: isConnected
-};
-
 var mqtt: Mqtt.Client | undefined;
 var rootTopic: string | undefined;
 var connected = false;
@@ -27,7 +21,7 @@ export function begin(broker: string, credentials: { username: string, password:
 
     rootTopic = topic;
 
-    var mqttOptions = {
+    var mqttOptions = <Mqtt.IClientOptions>{
         clientId: 'xbmq-' + Math.random().toString(16).substr(2, 8),
         clean: false,
         keepalive: 60,
@@ -79,7 +73,7 @@ export function begin(broker: string, credentials: { username: string, password:
              */
             return;
         }
-        mqtt && mqtt.subscribe(rootTopic + '/request', null, function (error: any) {
+        mqtt && mqtt.subscribe(rootTopic + '/request', {}, function (error: any) {
             if (error) {
                 return messageCallback(error);
             }
@@ -139,7 +133,7 @@ export function publishOnlineStatus(isOnline: boolean) {
  * @throws {ReferenceError} - If begin() not called or rootTopic is false.
  * @throws {ReferenceError} - If frame is invalid or has no remote64 address.
  */
-export function publishXBeeFrame(frame:any) {
+export function publishEzspFrame(frame:any) {
     if (!mqtt || !isConnected()) throw new ReferenceError("MQTT not conencted.");
     if (!frame) return; /* don't publish empty frames */
     var topic = rootTopic + '/response';

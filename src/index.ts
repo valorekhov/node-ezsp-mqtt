@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import * as ezsp from './ezsp';
+import { EzspGateway } from './ezsp';
 import * as mqtt from './mqtt';
 import log from './logger';
 import nconf from './nconf';
@@ -14,39 +14,14 @@ const credentials = {
 const port = nconf.get('port');
 const baud = nconf.get('baud');
 
+const ezsp = new EzspGateway();
+
 /*
  * Global variables
  */
-var gatewayTopic;
+let gatewayTopic: string;
 
-/*
- * Fire up the ezsp and invoke the callback once the
- * ezsp is ready to receive commands.
- * 
- * Local and remote ezsps must have the same ID and use
- * API mode 2.
- */
-ezsp.begin(port, baud, beginMqtt, whenezspMessageReceived);
-
-/*
- * Start the MQTT client.  Use the local ezsp's 64-bit
- * address as part of the topic.
- */
-function beginMqtt() {
-    ezsp.getLocalNI().then(function (name: string) {
-        name = name.trim();
-        if (!name || name.length === 0) {
-            log('error', 'Local ezsp NI not set.');
-            name = 'UNKNOWN';
-        }
-        gatewayTopic = rootTopic + '/' + name;
-        log('info', 'Gateway Topic: ' + gatewayTopic);
-        mqtt.begin(broker, credentials, gatewayTopic, whenMqttMessageReceived);
-    });
-}
-
-export function whenMqttMessageReceived(error: Error, topic: string, message: any) {
-
+function whenMqttMessageReceived(error: Error, topic: string, message: any) {
     if (error) {
         log(error);
         /*
@@ -56,25 +31,27 @@ export function whenMqttMessageReceived(error: Error, topic: string, message: an
         return;
     }
 
+    let arr = topic.split('/');
+    let idx = arr.indexOf('request');
+    if (idx < 1){
+        throw new Error('Invalid topic format' + topic);
+    }
+    let address = arr[idx-1];
+
+    let obj = JSON.parse(message);
+
     try {
-        ezsp.transmitMqttMessage(message);
+        ezsp.transmitMqttMessage(address, obj.frame, obj.payload);
     } catch (error) {
         log(error);
         mqtt.publishLog(error);
     }
 }
 
-export function whenezspMessageReceived(error: Error, frame: any) {
+function whenEzspMessageReceived(frame: any) {
     try {
-        if (error) {
-            log('error', error);
-            if (mqtt.isConnected()) {
-                mqtt.publishLog(error);
-            }
-        } else {
-            if (mqtt.isConnected()) {
-                mqtt.publishezspFrame(frame);
-            }
+        if (mqtt.isConnected()) {
+            mqtt.publishEzspFrame(frame);
         }
     } catch (error) {
         log('error', error);
@@ -83,3 +60,19 @@ export function whenezspMessageReceived(error: Error, frame: any) {
         }
     }
 }
+
+async function run() {
+    /*
+     * Fire up the ezsp and invoke the callback once the
+     * ezsp is ready to receive commands.
+     */
+    await ezsp.begin(port, baud, whenEzspMessageReceived);
+    const localAddress = await ezsp.getLocalAddress();
+
+    gatewayTopic = rootTopic + '/' + localAddress;
+    log('info', 'Gateway Topic: ' + gatewayTopic);
+    mqtt.begin(broker, credentials, gatewayTopic, whenMqttMessageReceived);
+    log('info', 'Started!');
+}
+
+run();
