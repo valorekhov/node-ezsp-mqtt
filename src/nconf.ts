@@ -5,6 +5,7 @@ nconf.file({
     file: __dirname + '/config.json'
 });
 nconf.defaults({
+    deviceDb: __dirname + '/devices.json',
     rootTopic: 'zbmq',
     broker: 'mqtt://test.mosquitto.org',
     username: null,
@@ -13,7 +14,8 @@ nconf.defaults({
     baud: 57600,
     log: __dirname + '/zbmq.log',
     loglevel: 'info',
-    apiMode: 2
+    expandResponseTopics: true,
+    expandReplyTopics: true
 });
 
 export default nconf;

@@ -37,7 +37,7 @@
     "bunyan": "^1.8.10",
     "mqtt": "^2.9.1",
     "nconf": "^0.8.4",
-    "node-ezsp": "0.0.4",
+    "node-ezsp": "0.0.9",
     "serialport": "^4.0.7"
   },
    "engines": {

@@ -1,9 +1,12 @@
 import * as Mqtt from 'mqtt';
 import log from './logger';
+import nconf from './nconf';
 
-var mqtt: Mqtt.Client | undefined;
-var rootTopic: string | undefined;
-var connected = false;
+let mqtt: Mqtt.Client | undefined;
+let rootTopic: string | undefined;
+let connected = false;
+
+const expandResponseTopics : boolean = nconf.get('expandResponseTopics');
 
 export function isConnected() {
     return connected && mqtt && rootTopic;
@@ -73,7 +76,7 @@ export function begin(broker: string, credentials: { username: string, password:
              */
             return;
         }
-        mqtt && mqtt.subscribe(rootTopic + '/request', {}, function (error: any) {
+        mqtt && mqtt.subscribe(rootTopic + '/+/request', {}, function (error: any) {
             if (error) {
                 return messageCallback(error);
             }
@@ -140,6 +143,14 @@ export function publishEzspFrame(frame:any) {
     var message = JSON.stringify(frame);
     log.debug('Sending: ' + topic + ': ' + message);
     mqtt.publish(topic, message);
+
+    if (expandResponseTopics){
+        let topic = `${rootTopic}/${frame.senderEui64 || ('nwk:0x' + frame.sender.toString(16))}/response`;
+        delete frame.senderEui64;
+        message = JSON.stringify(frame);
+        log.debug('Sending: ' + topic + ': ' + message);
+        mqtt.publish(topic, message);
+    }
 }
 
 /**

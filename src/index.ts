@@ -41,7 +41,7 @@ function whenMqttMessageReceived(error: Error, topic: string, message: any) {
     let obj = JSON.parse(message);
 
     try {
-        ezsp.transmitMqttMessage(address, obj.frame, obj.payload);
+        ezsp.transmitMqttMessage(address, obj.apsFrame, obj.message.data || obj.message);
     } catch (error) {
         log.error(error);
         mqtt.publishLog(error);
