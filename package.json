@@ -1,6 +1,6 @@
 {
   "name": "node-ezsp-mqtt",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "NodeJS EZSP to MQTT gateway",
   "main": "build/index.js",
   "scripts": {
