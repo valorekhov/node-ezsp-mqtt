@@ -31,16 +31,16 @@ function whenMqttMessageReceived(error: Error, topic: string, message: any) {
         return;
     }
 
-    if (topic.endsWith('permit-joinig')){
-        return permitJoining(parseInt(message, 10)); 
+    if (topic.endsWith('permit-joinig')) {
+        return ezsp.permitJoining(parseInt(message, 10));
     }
 
     let arr = topic.split('/');
     let idx = arr.indexOf('request');
-    if (idx < 1){
+    if (idx < 1) {
         throw new Error('Invalid topic format' + topic);
     }
-    let address = arr[idx-1];
+    let address = arr[idx - 1];
 
     let obj = JSON.parse(message);
 
@@ -50,12 +50,6 @@ function whenMqttMessageReceived(error: Error, topic: string, message: any) {
         log.error(error);
         mqtt.publishLog(error);
     }
-}
-
-async function permitJoining(seconds:number){
-    log('info', 'Permitting joining for ' + seconds + ' seconds');
-    await ezsp.permitJoining(seconds);
-    log('info', 'Stopping allowing new node joins');    
 }
 
 function whenEzspMessageReceived(frame: any) {

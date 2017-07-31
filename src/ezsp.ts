@@ -1,7 +1,8 @@
 import { ControllerApplication } from 'node-ezsp'
 import { EmberApsFrame, EmberEUI64, EmberApsOption } from 'node-ezsp/lib/types';
 import nconf from './nconf';
-import {existsSync, writeFileSync} from 'fs'
+import { existsSync, writeFileSync } from 'fs';
+import log from './logger';
 
 const deviceDbPath = nconf.get('deviceDb');
 
@@ -11,36 +12,42 @@ export class EzspGateway {
     private messageCallback: (payload: {}) => void;
     private sequence = 0;
 
-    constructor(){
+    constructor() {
         this.application = new ControllerApplication(this.getDevices());
         this.application.on('deviceJoined', this.handleDeviceJoin.bind(this));
         this.application.on('deviceLeft', this.handleDeviceLeft.bind(this));
     }
 
-    handleDeviceJoin(arr:any[]){
+    async permitJoining(seconds: number) {
+        log.info('Permitting joining for ' + seconds + ' seconds');
+        await this.application.permitJoining(seconds);
+        log.info('Stopping allowing new node joins');
+    }
+
+    handleDeviceJoin(arr: any[]) {
         let [nwk, ieee] = arr;
         let devices = this.getDevices();
 
-        if (!devices.some(d=>d.nodeId === nwk || d.eui64 === ieee.toString())){
-            devices.push({nodeId: nwk, eui64: ieee.toString()});
+        if (!devices.some(d => d.nodeId === nwk || d.eui64 === ieee.toString())) {
+            devices.push({ nodeId: nwk, eui64: ieee.toString() });
             writeFileSync(deviceDbPath, JSON.stringify(devices), 'utf8');
         }
     }
 
-    handleDeviceLeft(arr:any[]){
+    handleDeviceLeft(arr: any[]) {
         let [nwk, ieee] = arr;
         let devices = this.getDevices();
 
-        let idx = devices.findIndex(d=>d.nodeId === nwk && d.eui64 === ieee.toString());
-        if (idx >= 0){
+        let idx = devices.findIndex(d => d.nodeId === nwk && d.eui64 === ieee.toString());
+        if (idx >= 0) {
             devices = devices.splice(idx, 1);
             writeFileSync(deviceDbPath, JSON.stringify(devices), 'utf8');
         }
     }
 
-    getDevices() : Array<{nodeId:number, eui64: string}>{
+    getDevices(): Array<{ nodeId: number, eui64: string }> {
         let devices = [];
-        if (existsSync(deviceDbPath)){
+        if (existsSync(deviceDbPath)) {
             devices = require(deviceDbPath)
         }
         return devices;
@@ -95,7 +102,7 @@ export class EzspGateway {
         }
 
         apsFrame.options = apsFrame.options || (EmberApsOption.APS_OPTION_FORCE_ROUTE_DISCOVERY | EmberApsOption.APS_OPTION_RETRY)
-        if (apsFrame.sequence === undefined){
+        if (apsFrame.sequence === undefined) {
             this.sequence = (this.sequence + 1) % 0xff;
             apsFrame.sequence = this.sequence;
         }
