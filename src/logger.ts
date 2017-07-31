@@ -1,4 +1,4 @@
-import bunyan from 'bunyan';
+import * as bunyan from 'bunyan';
 import nconf from './nconf';
 
 /*bunyan.add(winston.transports.File, {

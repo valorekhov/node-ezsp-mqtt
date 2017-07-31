@@ -1,0 +1,6 @@
+.gitignore
+.npmignore
+/.vscode/
+/src/
+gulpfile.js
+tsconfig.json
