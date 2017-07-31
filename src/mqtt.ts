@@ -79,6 +79,12 @@ export function begin(broker: string, credentials: { username: string, password:
             }
         });
 
+        mqtt && mqtt.subscribe(rootTopic + '/permit-joining', {}, function (error: any) {
+            if (error) {
+                return messageCallback(error);
+            }
+        });
+
         if (connectedCallback) {
             connectedCallback();
         }
