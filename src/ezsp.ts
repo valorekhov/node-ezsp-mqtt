@@ -18,19 +18,19 @@ export class EzspGateway {
         this.application.on('deviceLeft', this.handleDeviceLeft.bind(this));
     }
 
-    async permitJoining(seconds: number) {
+    permitJoining(seconds: number) {
         log.info('Permitting joining for ' + seconds + ' seconds');
-        await this.application.permitJoining(seconds);
-        log.info('Stopping allowing new node joins');
+        this.application.permitJoining(seconds);
     }
 
     handleDeviceJoin(arr: any[]) {
         let [nwk, ieee] = arr;
         let devices = this.getDevices();
-
+        log.info('Device join request received: %s %s', nwk, ieee);
         if (!devices.some(d => d.nodeId === nwk || d.eui64 === ieee.toString())) {
             devices.push({ nodeId: nwk, eui64: ieee.toString() });
             writeFileSync(deviceDbPath, JSON.stringify(devices), 'utf8');
+            log.info('Added device to DB: %s %s', nwk, ieee)
         }
     }
 
@@ -85,7 +85,7 @@ export class EzspGateway {
             stopBits: 1,
             xon: true,
             xoff: true
-        })
+        }).then(()=>application.getNetworkParameters())
     }
 
     end() {

@@ -31,7 +31,7 @@ function whenMqttMessageReceived(error: Error, topic: string, message: any) {
         return;
     }
 
-    if (topic.endsWith('permit-joinig')) {
+    if (topic.endsWith('/permit-joining')) {
         return ezsp.permitJoining(parseInt(message, 10));
     }
 
@@ -70,7 +70,12 @@ async function run() {
      * Fire up the ezsp and invoke the callback once the
      * ezsp is ready to receive commands.
      */
-    await ezsp.begin(port, baud, whenEzspMessageReceived);
+    let networkParams = await ezsp.begin(port, baud, whenEzspMessageReceived);
+    log.info('Ember Node Type: %s, EPAN ID: 0x%s, PAN ID: 0x%s',
+        networkParams.nodeType, 
+        Buffer.from((networkParams.networkParams as any)['extendedPanId'].reverse()).toString('hex'), 
+        (networkParams.networkParams as any)['panId'].toString(16)
+    );
     const localAddress = await ezsp.getLocalAddress();
 
     gatewayTopic = rootTopic + '/' + localAddress;

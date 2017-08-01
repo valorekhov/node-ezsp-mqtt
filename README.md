@@ -6,6 +6,8 @@ Provides for two-way communication with ZigBee networks through MQTT messages.
 Quick Start
 ------------
 Install node-ezsp-mqtt via `npm install node-ezsp-mqtt`. 
+Installation on RaspberryPI requires additional `--unsafe-perm --build-from-source` args
+due to the SerialPort dependency
 
 Configure the local Ember device:
 
@@ -68,6 +70,25 @@ Tips for Using with MQTT Clients
 ### Node-Red
 * Connect a JSON node to the output of the MQTT node that is subscribed to the
 `request` topic.
+
+Interop With XBee Devices
+--------------------------------
+1. Suggested configuration
+ZS 2 Stack profile #2
+EE 1 #Enable Device Security
+EO 1
+KY 5A6967426565416C6C69616E63653039 #Trust Center Key for HA
+SE E8
+DE E8
+CI 11
+DH 0  #All Packets will be sent to the EZSP gateway, also the coordinator on the network
+DL 0 
+ID <Hex value of the extended pan ID as obtained from the logs>
+
+2. Send a message to the rootTopic/gatewayId/permit-joining topic with values 0..255
+Where 0 disables any future joins, 255 enables permanently and any value in between enables for the given number of seconds.
+
+3. Monitor logs and the devices.json file for the new device entry upon a successful join.
 
 About
 -----
