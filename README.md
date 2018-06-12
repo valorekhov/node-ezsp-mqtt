@@ -74,6 +74,7 @@ Tips for Using with MQTT Clients
 Interop With XBee Devices
 --------------------------------
 1. Suggested configuration
+```text
 ZS 2 Stack profile #2
 EE 1 #Enable Device Security
 EO 1
@@ -84,6 +85,7 @@ CI 11
 DH 0  #All Packets will be sent to the EZSP gateway, also the coordinator on the network
 DL 0 
 ID <Hex value of the extended pan ID as obtained from the logs>
+```
 
 2. Send a message to the rootTopic/gatewayId/permit-joining topic with values 0..255
 Where 0 disables any future joins, 255 enables permanently and any value in between enables for the given number of seconds.
