@@ -1,3 +1,5 @@
+# Migrated to GitLab: https://gitlab.com/valorekhov/node-ezsp-mqtt
+
 # node-ezsp-mqtt
 
 MQTT Gateway for Ember EZSP protocol devides based on xbmq-js.
